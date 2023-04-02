@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) { // main.c <file> -o <file> | main -
     char *line, *pos;
 
     size_t len_used, chunk_used, len = sizeof(chunk);
-    if (!(fw && fp)) { PRINT_ERROR("1File can't be opened.", 2); }
+    if (!(fw && fp)) { PRINT_ERROR("File can't be opened.", 2); }
     if (!(line = malloc(len))) { PRINT_ERROR("Unable to allocate memory for the line buffer.", 12); }
 
     int linecount = 1, todocount = 1;
