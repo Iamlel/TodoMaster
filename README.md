@@ -33,8 +33,6 @@ Generated main.c.TodoMaster:
 -----FIXME-----
 1. FIXME (L6 C19) : Fix main.
 2. FIXME (L9 C56) : change %s to %d.
-
-                                                                                               1. TODO (L3 C27) : Make test do something.                                                                    2. TODO (L7 C4) : Add some functionality to the program.                                                                                                                                                                    -----FIXME-----                                                                                               1. FIXME (L6 C19) : Fix main.                                                                                 2. FIXME (L9 C56) : change %s to %d.
 ```
 
 Usage: `./todomaster <input-file> [-o/--ouput <output-file>]/[-h/--help]`
