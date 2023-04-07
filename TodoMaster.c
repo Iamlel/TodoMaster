@@ -16,6 +16,71 @@
     printf("\t-o, --output \t\t\tChoose the output file name.\n");\
 }
 
+typedef struct node {
+    int line;
+    int ch;
+    char *data;
+    struct node *next;
+} Node;
+
+typedef struct list {
+    Node *head;
+} List;
+
+Node *createnode(int line, int ch, char *data) {
+    Node *newNode = malloc(sizeof(Node));
+    if (!newNode) { return NULL; }
+
+    newNode->line = line;
+    newNode->ch   = ch;
+    newNode->data = strdup(data);
+    newNode->next = NULL;
+    return newNode;
+}
+
+List *makelist() {
+    List *list = malloc(sizeof(List));
+    if (!list) { return NULL; }
+    list->head = NULL;
+    return list;
+}
+
+void display(List *list, FILE *fp, char text[]) {
+    if (list->head == NULL) { return; }
+    fprintf(fp, "-----%s-----\n", text);
+
+    int x = 1;
+    for (Node *current = list->head; current != NULL; current = current->next) {
+        fprintf(fp, "%d. %s (L%d C%d) %s", x, text, current->line, current->ch, current->data);
+        x++;
+    }
+    fprintf(fp, "\n");
+}
+
+void add(int line, int ch, char *data, List *list){
+    Node *current = NULL;
+    if (list->head == NULL) {
+        list->head = createnode(line, ch, data);
+    } else {
+        current = list->head;
+        while (current->next!=NULL) {
+            current = current->next;
+        }
+        current->next = createnode(line, ch, data);
+    }
+}
+
+void destroy(List *list){
+    Node *current = list->head;
+    Node *next = current;
+    while (current != NULL) {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+    free(list);
+}
+
 int main(int argc, char *argv[]) { // main.c <file> -o <file> | main -
     if (argc < 2) {
         PRINT_HELP()
@@ -48,7 +113,11 @@ int main(int argc, char *argv[]) { // main.c <file> -o <file> | main -
     if (!(fw && fp)) { PRINT_ERROR("File can't be opened.", 2); }
     if (!(line = malloc(len))) { PRINT_ERROR("Unable to allocate memory for the line buffer.", 12); }
 
-    int linecount = 1, todocount = 1;
+    int linecount = 1, todocount = 1, fixmecount = 1, todoseek = 0;
+
+    List *todolist = makelist();
+    List *fixmelist = makelist();
+
     while (fgets(chunk, sizeof(chunk), fp)) {
         len_used = strlen(line);
         chunk_used = strlen(chunk);
@@ -66,16 +135,26 @@ int main(int argc, char *argv[]) { // main.c <file> -o <file> | main -
 
         if (line[len_used - 1] == '\n') {
             if (pos = strstr(line, "TODO")) {
-                fprintf(fw, "%d. TODO (L%d C%d) %s", todocount, linecount, (int) (pos - line) + 1, pos + 4);
+                add(linecount, (int) (pos - line) + 1, pos + 4, todolist);
                 todocount++;
+                line[0] = '\0';
+            } else if (pos = strstr(line, "FIXME")) {
+                add(linecount, (int) (pos - line) + 1, pos + 5, fixmelist);
+                fixmecount++;
                 line[0] = '\0';
             }
             linecount++;
         }
     }
 
+    free(line);
+    display(todolist, fw, "TODO");
+    display(fixmelist, fw, "FIXME");
+
     fclose(fp);
     fclose(fw);
-    free(line);
+    destroy(fixmelist);
+    destroy(todolist);
+
     return 0;
 }
