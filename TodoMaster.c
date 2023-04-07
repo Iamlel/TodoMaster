@@ -81,7 +81,7 @@ void destroy(List *list){
     free(list);
 }
 
-int main(int argc, char *argv[]) { // main.c <file> -o <file> | main -
+int main(int argc, char *argv[]) { // todomaster.c <file> -o <file> | main -
     if (argc < 2) {
         PRINT_HELP()
         PRINT_ERROR("Not enough arguments given.", -1);
@@ -113,8 +113,7 @@ int main(int argc, char *argv[]) { // main.c <file> -o <file> | main -
     if (!(fw && fp)) { PRINT_ERROR("File can't be opened.", 2); }
     if (!(line = malloc(len))) { PRINT_ERROR("Unable to allocate memory for the line buffer.", 12); }
 
-    int linecount = 1, todocount = 1, fixmecount = 1, todoseek = 0;
-
+    int linecount = 1;
     List *todolist = makelist();
     List *fixmelist = makelist();
 
@@ -123,7 +122,7 @@ int main(int argc, char *argv[]) { // main.c <file> -o <file> | main -
         chunk_used = strlen(chunk);
 
         if (len - len_used < chunk_used) {
-            len *= 2;
+            len = len << 1;
             if (!(line = realloc(line, len))) {
                 free(line);
                 PRINT_ERROR("Unable to reallocate memory for the line buffer.", 12);
@@ -134,13 +133,13 @@ int main(int argc, char *argv[]) { // main.c <file> -o <file> | main -
         len_used += chunk_used;
 
         if (line[len_used - 1] == '\n') {
-            if (pos = strstr(line, "TODO")) {
+            if (strstr(line, "TODO")) {
+                pos = strstr(line, "TODO");
                 add(linecount, (int) (pos - line) + 1, pos + 4, todolist);
-                todocount++;
                 line[0] = '\0';
-            } else if (pos = strstr(line, "FIXME")) {
+            } else if (strstr(line, "FIXME")) {
+                pos = strstr(line, "FIXME");
                 add(linecount, (int) (pos - line) + 1, pos + 5, fixmelist);
-                fixmecount++;
                 line[0] = '\0';
             }
             linecount++;
